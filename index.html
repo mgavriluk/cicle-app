@@ -344,7 +344,8 @@ button:focus-visible,input:focus-visible{outline:2.5px solid var(--blue);outline
     <div class="rules"><ul>
       <li><b>Отдых 3–5 мин</b> между тяжёлыми подходами. Меньше — это уже не сила, а выносливость. Жми кнопку с таймером.</li>
       <li><b>Разгоняй штангу вверх.</b> Вниз подконтрольно, вверх — максимально быстро, даже на лёгком весе. Именно это тренирует то, чего не хватает.</li>
-      <li><b>Прогрессия:</b> все подходы чисто → +2,5 кг. Застрял дважды подряд → минус 7,5 кг и заново.</li>
+      <li><b>База (жим, присед, тяга):</b> все подходы чисто → +2,5 кг. Застрял дважды подряд на одном весе → минус 7,5 кг и заново.</li>
+      <li><b>Остальное — по повторениям.</b> Диапазон вроде 12–15: стоишь на весе, пока не сделаешь верхнюю границу во всех подходах. Только тогда прибавляй. Вес здесь сам не растёт — это нормально.</li>
     </ul></div>
   </section>
 
@@ -392,30 +393,30 @@ button:focus-visible,input:focus-visible{outline:2.5px solid var(--blue);outline
 const PLAN=[
  {n:'Верх',s:'тяжёлый',c:'red',ex:[
    {n:'Жим лёжа',sets:5,r:'3',base:65,step:2.5,rest:270,key:1},
-   {n:'Подтягивания с весом',sets:4,r:'5',rest:180},
+   {n:'Подтягивания с весом',sets:4,r:'5–8',rest:180},
    {n:'Жим стоя со штангой',sets:3,r:'5',base:40,step:1.25,rest:180,key:1},
-   {n:'Тяга штанги в наклоне',sets:4,r:'6',rest:150},
-   {n:'Трицепс на блоке',sets:3,r:'12',rest:75}
+   {n:'Тяга штанги в наклоне',sets:4,r:'6–8',rest:150},
+   {n:'Трицепс на блоке',sets:3,r:'12–15',rest:75}
  ]},
  {n:'Низ',s:'тяжёлый',c:'red',ex:[
    {n:'Присед со штангой',sets:5,r:'3',base:80,step:2.5,rest:270,key:1},
-   {n:'Румынская тяга',sets:3,r:'8',rest:150},
-   {n:'Выпады с гантелями',sets:3,r:'10 / ногу',rest:120},
+   {n:'Румынская тяга',sets:3,r:'8–10',rest:150},
+   {n:'Выпады с гантелями',sets:3,r:'10–12',rest:120},
    {n:'Планка',sets:3,r:'45 сек',nw:1,rest:60}
  ]},
  {n:'Верх',s:'объём',c:'blue',ex:[
    {n:'Жим лёжа',sets:4,r:'6',base:57.5,step:2.5,rest:180,key:1},
-   {n:'Жим гантелей под углом',sets:3,r:'10',rest:120},
-   {n:'Тяга верхнего блока',sets:4,r:'10',rest:105},
-   {n:'Тяга гантели в наклоне',sets:3,r:'12',rest:90},
-   {n:'Бицепс + разгибания',sets:3,r:'12',rest:75}
+   {n:'Жим гантелей под углом',sets:3,r:'10–12',rest:120},
+   {n:'Тяга верхнего блока',sets:4,r:'10–12',rest:105},
+   {n:'Тяга гантели в наклоне',sets:3,r:'12–15',rest:90},
+   {n:'Бицепс + разгибания',sets:3,r:'12–15',rest:75}
  ]},
  {n:'Низ + пресс',s:'объём',c:'blue',ex:[
    {n:'Становая тяга',sets:4,r:'4',base:100,step:5,rest:270,key:1},
-   {n:'Жим ногами',sets:3,r:'12',rest:120},
-   {n:'Сгибания ног',sets:3,r:'12',rest:90},
-   {n:'Подъём ног в висе',sets:4,r:'12',nw:1,rest:75},
-   {n:'Колесо для пресса',sets:3,r:'10',nw:1,rest:75}
+   {n:'Жим ногами',sets:3,r:'12–15',rest:120},
+   {n:'Сгибания ног',sets:3,r:'12–15',rest:90},
+   {n:'Подъём ног в висе',sets:4,r:'12–15',nw:1,rest:75},
+   {n:'Колесо для пресса',sets:3,r:'10–12',nw:1,rest:75}
  ]}
 ];
 const WEEKS=12, TOTAL=WEEKS*4, GOAL=155;
@@ -468,11 +469,13 @@ function rec(w,d,i){
   const k=sid(w,d), s=S.log[k]||(S.log[k]={});
   return s[i]||(s[i]={w:null,s:[]});
 }
+/* Вес сам растёт только у базовых упражнений (те, у которых задан step).
+   Остальные переносятся без изменений — там прогрессия по повторениям. */
 function suggest(w,d,i){
   const e=PLAN[d].ex[i];
   for(let k=w;k>=1;k--){
     const r=(S.log[sid(k,d)]||{})[i];
-    if(r&&r.w!=null) return k===w?r.w:r.w+(e.step||2.5)*(w-k);
+    if(r&&r.w!=null) return k===w?r.w:r.w+(e.step||0)*(w-k);
   }
   return e.base!=null? e.base+(e.step||0)*(w-1) : null;
 }
@@ -537,19 +540,20 @@ function render(){
     if(!e.nw){
       const sug=suggest(S.week,S.day,i);
       const wt=document.createElement('div');wt.className='wt';
-      const minus=document.createElement('button');minus.textContent='−';minus.setAttribute('aria-label','Минус 2,5 кг');
+      const st=e.step||2.5;
+      const minus=document.createElement('button');minus.textContent='−';minus.setAttribute('aria-label','Минус '+st+' кг');
       const inp=document.createElement('input');
       inp.type='number';inp.step='1.25';inp.inputMode='decimal';
       inp.setAttribute('aria-label','Вес: '+e.n);
       if(r.w!=null)inp.value=r.w; else if(sug!=null)inp.placeholder=sug;
-      const plus=document.createElement('button');plus.textContent='+';plus.setAttribute('aria-label','Плюс 2,5 кг');
+      const plus=document.createElement('button');plus.textContent='+';plus.setAttribute('aria-label','Плюс '+st+' кг');
       const u=document.createElement('span');u.className='u';u.textContent='КГ';
       const bump=(v)=>{
         const cur=inp.value!==''?parseFloat(inp.value):(sug!=null?sug:0);
         const nv=Math.max(0,Math.round((cur+v)*4)/4);
         inp.value=nv;r.w=nv;save();
       };
-      minus.onclick=()=>bump(-2.5);plus.onclick=()=>bump(2.5);
+      minus.onclick=()=>bump(-st);plus.onclick=()=>bump(st);
       inp.oninput=()=>{r.w=inp.value===''?null:parseFloat(inp.value);save();};
       wt.append(minus,inp,u,plus);ctl.appendChild(wt);
     }
