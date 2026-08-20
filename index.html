@@ -191,6 +191,25 @@ button,.tab,.set,.sc-cell{-webkit-user-select:none;user-select:none}
 }
 .rest-btn.key{border-color:var(--ink);border-width:1.5px}
 
+.ex-prev{
+  font-family:'JetBrains Mono',ui-monospace,Menlo,monospace;font-size:11px;color:var(--muted);
+  margin-top:4px;letter-spacing:.01em;
+}
+.chips{display:flex;gap:5px;margin-top:10px}
+.chip{
+  flex:1;height:36px;border:1px solid var(--line-strong);background:transparent;border-radius:2px;
+  font-family:'Barlow';font-size:13.5px;font-weight:600;color:var(--muted);cursor:pointer;
+}
+.chip.on[data-v="easy"]{background:var(--ok);border-color:var(--ok);color:#fff}
+.chip.on[data-v="ok"]{background:var(--ink);border-color:var(--ink);color:var(--surface)}
+.chip.on[data-v="hard"]{background:var(--red);border-color:var(--red);color:#fff}
+.note{
+  width:100%;height:37px;margin-top:7px;border:1px solid var(--line);border-radius:2px;
+  background:transparent;padding:0 9px;font-family:'Barlow';font-size:14.5px;color:var(--ink);
+}
+.note::placeholder{color:var(--muted);font-size:13.5px}
+.note:focus{outline:2px solid var(--ink);outline-offset:-2px}
+
 /* rules */
 .rules{padding:12px 13px}
 .rules li{font-size:14.5px;margin-bottom:8px;color:#2A3036}
@@ -407,9 +426,10 @@ const PLAN=[
  {n:'Верх',s:'объём',c:'blue',ex:[
    {n:'Жим лёжа',sets:4,r:'6',base:57.5,step:2.5,rest:180,key:1},
    {n:'Жим гантелей под углом',sets:3,r:'10–12',rest:120},
+   {n:'Разгибания на блоке (трицепс)',sets:3,r:'12–15',rest:90},
    {n:'Тяга верхнего блока',sets:4,r:'10–12',rest:105},
    {n:'Тяга гантели в наклоне',sets:3,r:'12–15',rest:90},
-   {n:'Бицепс + разгибания',sets:3,r:'12–15',rest:75}
+   {n:'Подъём на бицепс',sets:3,r:'12–15',rest:75}
  ]},
  {n:'Низ + пресс',s:'объём',c:'blue',ex:[
    {n:'Становая тяга',sets:4,r:'4',base:100,step:5,rest:270,key:1},
@@ -469,6 +489,14 @@ function rec(w,d,i){
   const k=sid(w,d), s=S.log[k]||(S.log[k]={});
   return s[i]||(s[i]={w:null,s:[]});
 }
+function prevInfo(w,d,i){
+  for(let k=w-1;k>=1;k--){
+    const r=(S.log[sid(k,d)]||{})[i];
+    if(r&&(r.w!=null||r.d||r.n))return {k:k,r:r};
+  }
+  return null;
+}
+
 /* Вес сам растёт только у базовых упражнений (те, у которых задан step).
    Остальные переносятся без изменений — там прогрессия по повторениям. */
 function suggest(w,d,i){
@@ -578,31 +606,78 @@ function render(){
     rb.onclick=()=>startClock(e.rest,e.n);
     ctl.appendChild(rb);
 
-    row.appendChild(ctl);L.appendChild(row);
+    row.appendChild(ctl);
+
+    const pv=prevInfo(S.week,S.day,i);
+    if(pv){
+      const t=document.createElement('div');t.className='ex-prev';
+      const parts=[];
+      if(pv.r.w!=null)parts.push(pv.r.w+' кг');
+      if(pv.r.d)parts.push(({easy:'легко',ok:'норм',hard:'тяжело'})[pv.r.d]);
+      if(pv.r.n)parts.push(pv.r.n);
+      t.textContent='Нед. '+pv.k+': '+parts.join(' · ');
+      top.insertAdjacentElement('afterend',t);
+    }
+
+    const chips=document.createElement('div');chips.className='chips';
+    [['easy','Легко'],['ok','Норм'],['hard','Тяжело']].forEach(c=>{
+      const b=document.createElement('button');
+      b.className='chip'+(r.d===c[0]?' on':'');b.dataset.v=c[0];b.textContent=c[1];
+      b.onclick=()=>{
+        r.d = r.d===c[0] ? null : c[0];
+        chips.querySelectorAll('.chip').forEach(x=>x.classList.toggle('on',x.dataset.v===r.d));
+        save();
+      };
+      chips.appendChild(b);
+    });
+    row.appendChild(chips);
+
+    const nt=document.createElement('input');
+    nt.className='note';nt.type='text';nt.value=r.n||'';
+    nt.placeholder='Заметка: 12, 12, 12, 10…';
+    nt.setAttribute('aria-label','Заметка: '+e.n);
+    nt.oninput=()=>{r.n=nt.value;save();};
+    row.appendChild(nt);
+
+    L.appendChild(row);
   });
 
   drawSc();
 }
 
-/* ---------- раунд-таймер ---------- */
-let cT=null,cLeft=0,cTot=0;
+/* ---------- раунд-таймер ----------
+   Считаем от метки времени, а не тиками: если приложение свернули,
+   система усыпляет таймер, но при возврате остаток пересчитается верно. */
+let cT=null,cEnd=0,cTot=0,cRang=false,wakeLock=null;
 const fmt=s=>Math.floor(s/60)+':'+String(s%60).padStart(2,'0');
+
+async function keepAwake(on){
+  try{
+    if(on){
+      if('wakeLock' in navigator && !wakeLock) wakeLock=await navigator.wakeLock.request('screen');
+    }else if(wakeLock){ await wakeLock.release(); wakeLock=null; }
+  }catch(e){}
+}
 function startClock(sec,name){
-  clearInterval(cT);cTot=cLeft=sec;
+  clearInterval(cT);
+  cTot=sec; cEnd=Date.now()+sec*1000; cRang=false;
   const c=document.getElementById('clock');
   c.classList.add('up');c.classList.remove('done');
   c.style.setProperty('--dialc',PLAN[S.day].c==='red'?'#B01F24':'#16497E');
   document.getElementById('clkN').textContent=name;
   document.getElementById('clkK').textContent='Отдых до следующего подхода';
+  keepAwake(true);
   tick();
-  cT=setInterval(()=>{cLeft--;tick();if(cLeft<=0)ring();},1000);
+  cT=setInterval(tick,250);
 }
 function tick(){
-  document.getElementById('dialT').textContent=fmt(Math.max(0,cLeft));
-  document.getElementById('dial').style.setProperty('--deg',(360*(cTot-cLeft)/cTot)+'deg');
+  const left=Math.max(0,Math.ceil((cEnd-Date.now())/1000));
+  document.getElementById('dialT').textContent=fmt(left);
+  document.getElementById('dial').style.setProperty('--deg',(360*(cTot-left)/cTot)+'deg');
+  if(left<=0&&!cRang)ring();
 }
 function ring(){
-  clearInterval(cT);
+  cRang=true;clearInterval(cT);keepAwake(false);
   const c=document.getElementById('clock');c.classList.add('done');
   document.getElementById('clkK').textContent='Готов — следующий подход';
   try{
@@ -619,8 +694,17 @@ function ring(){
   if(navigator.vibrate)navigator.vibrate([180,90,180]);
   setTimeout(()=>c.classList.remove('up'),4000);
 }
+/* Возврат в приложение: пересчитать остаток и вернуть блокировку экрана */
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden)return;
+  const c=document.getElementById('clock');
+  if(!c.classList.contains('up'))return;
+  tick();
+  if(!cRang)keepAwake(true);
+});
 document.getElementById('clkStop').onclick=()=>{
-  clearInterval(cT);document.getElementById('clock').classList.remove('up');
+  clearInterval(cT);cRang=true;keepAwake(false);
+  document.getElementById('clock').classList.remove('up');
 };
 
 /* ---------- белок ---------- */
