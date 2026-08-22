@@ -1,0 +1,113 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "description": "Cosmos DB для РАЗГОН: бесплатный тариф, один контейнер, раздел по пользователю. Создаётся через портал: Deploy a custom template."
+  },
+  "parameters": {
+    "accountName": {
+      "type": "string",
+      "defaultValue": "razgon-cosmos",
+      "metadata": { "description": "Имя аккаунта, глобально уникальное, только строчные." }
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "polandcentral",
+      "metadata": { "description": "Регион записи. После создания не меняется." }
+    },
+    "databaseName": {
+      "type": "string",
+      "defaultValue": "razgon"
+    },
+    "containerName": {
+      "type": "string",
+      "defaultValue": "data"
+    },
+    "throughput": {
+      "type": "int",
+      "defaultValue": 1000,
+      "metadata": { "description": "RU/s на уровне базы. Бесплатный тариф покрывает ровно 1000." }
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.DocumentDB/databaseAccounts",
+      "apiVersion": "2024-11-15",
+      "name": "[parameters('accountName')]",
+      "location": "[parameters('location')]",
+      "kind": "GlobalDocumentDB",
+      "properties": {
+        "databaseAccountOfferType": "Standard",
+        "enableFreeTier": true,
+        "capacity": {
+          "totalThroughputLimit": 1000
+        },
+        "consistencyPolicy": {
+          "defaultConsistencyLevel": "Session"
+        },
+        "locations": [
+          {
+            "locationName": "[parameters('location')]",
+            "failoverPriority": 0,
+            "isZoneRedundant": false
+          }
+        ],
+        "backupPolicy": {
+          "type": "Periodic",
+          "periodicModeProperties": {
+            "backupIntervalInMinutes": 1440,
+            "backupRetentionIntervalInHours": 48,
+            "backupStorageRedundancy": "Local"
+          }
+        },
+        "publicNetworkAccess": "Enabled",
+        "disableLocalAuth": false
+      }
+    },
+    {
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases",
+      "apiVersion": "2024-11-15",
+      "name": "[concat(parameters('accountName'), '/', parameters('databaseName'))]",
+      "dependsOn": [
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('accountName'))]"
+      ],
+      "properties": {
+        "resource": {
+          "id": "[parameters('databaseName')]"
+        },
+        "options": {
+          "throughput": "[parameters('throughput')]"
+        }
+      }
+    },
+    {
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
+      "apiVersion": "2024-11-15",
+      "name": "[concat(parameters('accountName'), '/', parameters('databaseName'), '/', parameters('containerName'))]",
+      "dependsOn": [
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases', parameters('accountName'), parameters('databaseName'))]"
+      ],
+      "properties": {
+        "resource": {
+          "id": "[parameters('containerName')]",
+          "partitionKey": {
+            "paths": ["/userId"],
+            "kind": "Hash"
+          },
+          "indexingPolicy": {
+            "indexingMode": "consistent",
+            "automatic": true,
+            "includedPaths": [{ "path": "/type/?" }],
+            "excludedPaths": [{ "path": "/*" }]
+          }
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "endpoint": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('accountName'))).documentEndpoint]"
+    }
+  }
+}

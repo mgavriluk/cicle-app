@@ -1,0 +1,8 @@
+node_modules
+dist
+.angular
+.git
+.vscode
+.mcp.json
+CLAUDE.md
+*.log
