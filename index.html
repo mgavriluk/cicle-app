@@ -217,62 +217,6 @@ button,.tab,.set,.sc-cell{-webkit-user-select:none;user-select:none}
 .rules b{font-weight:700;color:var(--ink)}
 .rules ul{margin:0;padding-left:17px}
 
-/* protein */
-.pro{padding:14px 13px}
-.pro-num{display:flex;align-items:flex-end;gap:8px;justify-content:center}
-.pro-num b{
-  font-family:'Anton','Haettenschweiler','Arial Narrow',Impact,sans-serif;font-weight:400;font-size:62px;line-height:.8;
-  font-variant-numeric:tabular-nums;
-}
-.pro-num span{
-  font-family:'JetBrains Mono',ui-monospace,Menlo,monospace;font-size:12px;color:var(--muted);
-  padding-bottom:5px;letter-spacing:.08em;
-}
-.pro-bar{height:9px;background:rgba(20,24,27,.1);border-radius:2px;margin:13px 0 4px;overflow:hidden}
-.pro-fill{height:100%;background:var(--ink);width:0;transition:width .35s ease}
-.pro-fill.hit{background:var(--ok)}
-.pro-scale{
-  display:flex;justify-content:space-between;
-  font-family:'JetBrains Mono',ui-monospace,Menlo,monospace;font-size:9px;color:var(--muted);letter-spacing:.08em;
-}
-.pro-avg{
-  text-align:center;margin-top:12px;font-size:13px;color:var(--muted);
-}
-.pro-avg b{font-family:'JetBrains Mono',ui-monospace,Menlo,monospace;font-weight:700;color:var(--ink)}
-.pro-avg.ok b{color:var(--ok)}
-
-.seg{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:15px}
-.seg button{
-  height:38px;border:1px solid var(--line-strong);background:transparent;border-radius:2px;
-  font-family:'JetBrains Mono',ui-monospace,Menlo,monospace;font-size:10.5px;font-weight:700;
-  letter-spacing:.12em;text-transform:uppercase;color:var(--muted);cursor:pointer;
-}
-.seg button.on{background:var(--ink);border-color:var(--ink);color:var(--surface)}
-
-.foods{margin-top:10px;border-top:1px solid var(--line)}
-.food{
-  width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;
-  padding:11px 2px;border:0;border-bottom:1px solid var(--line);background:transparent;
-  cursor:pointer;text-align:left;font-family:'Barlow';color:var(--ink);
-}
-.food:active{background:rgba(20,24,27,.05)}
-.fn{font-size:15.5px;font-weight:600;line-height:1.15}
-.fn i{
-  display:block;font-style:normal;font-size:12px;font-weight:400;color:var(--muted);
-}
-.fg{
-  font-family:'JetBrains Mono',ui-monospace,Menlo,monospace;font-size:14px;font-weight:700;white-space:nowrap;
-}
-.fg::before{content:'+';opacity:.4;margin-right:1px}
-
-.pro-manual{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:13px}
-.pro-manual button{
-  height:40px;border:1px solid var(--line-strong);background:transparent;border-radius:2px;
-  font-family:'JetBrains Mono',ui-monospace,Menlo,monospace;font-size:11px;font-weight:700;
-  cursor:pointer;color:var(--ink);letter-spacing:.04em;
-}
-.pro-manual #proUndo,.pro-manual #proReset{color:var(--muted);font-size:10px}
-
 /* round clock */
 .clock{
   position:fixed;left:0;right:0;bottom:0;z-index:50;
@@ -309,6 +253,23 @@ button,.tab,.set,.sc-cell{-webkit-user-select:none;user-select:none}
 .backup{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:14px}
 .backup button{
   height:40px;border:1px solid var(--line-strong);background:transparent;border-radius:2px;
+  font-family:'JetBrains Mono',ui-monospace,Menlo,monospace;font-size:10px;font-weight:700;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--muted);cursor:pointer;
+}
+.sync{margin-top:10px}
+.sync-hd{
+  font-family:'JetBrains Mono',ui-monospace,Menlo,monospace;font-size:9px;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;
+}
+.sync-hd span{color:var(--ink)}
+.sync input{
+  width:100%;height:36px;box-sizing:border-box;margin-bottom:5px;padding:0 8px;
+  border:1px solid var(--line-strong);border-radius:2px;background:transparent;
+  font-family:'JetBrains Mono',ui-monospace,Menlo,monospace;font-size:11px;color:var(--ink);
+}
+.sync-btns{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.sync-btns button{
+  height:36px;border:1px solid var(--line-strong);background:transparent;border-radius:2px;
   font-family:'JetBrains Mono',ui-monospace,Menlo,monospace;font-size:10px;font-weight:700;
   letter-spacing:.1em;text-transform:uppercase;color:var(--muted);cursor:pointer;
 }
@@ -368,33 +329,19 @@ button:focus-visible,input:focus-visible{outline:2.5px solid var(--blue);outline
     </ul></div>
   </section>
 
-  <section class="card">
-    <div class="card-hd"><h2>Белок сегодня</h2><span class="val" id="proDate"></span></div>
-    <div class="pro">
-      <div class="pro-num"><b id="proVal">0</b><span>/ 155 Г</span></div>
-      <div class="pro-bar"><div class="pro-fill" id="proFill"></div></div>
-      <div class="pro-scale"><span>0</span><span>минимум 150</span><span>200</span></div>
-      <div class="pro-avg" id="proAvg"></div>
-
-      <div class="seg" id="proSeg">
-        <button class="on" data-g="home">Дома</button>
-        <button data-g="out">Ресторан</button>
-      </div>
-      <div class="foods" id="foods"></div>
-
-      <div class="pro-manual">
-        <button data-a="-10">−10</button>
-        <button data-a="10">+10</button>
-        <button id="proUndo">Отменить</button>
-        <button id="proReset">Сброс</button>
-      </div>
-    </div>
-  </section>
-
   <div id="err"></div>
   <div class="backup">
     <button id="bkOut">Сохранить копию</button>
     <button id="bkIn">Загрузить копию</button>
+  </div>
+  <div class="sync">
+    <div class="sync-hd">Синхронизация: <span id="syncSt">выключена</span></div>
+    <input id="syncRepo" placeholder="логин/приватный-репо" autocapitalize="off" autocomplete="off" spellcheck="false">
+    <input id="syncTok" type="password" placeholder="токен GitHub" autocomplete="off">
+    <div class="sync-btns">
+      <button id="syncOn">Включить</button>
+      <button id="syncPull">Взять из репо</button>
+    </div>
   </div>
   <div class="foot">Данные сохраняются автоматически</div>
 </div>
@@ -439,11 +386,10 @@ const PLAN=[
    {n:'Колесо для пресса',sets:3,r:'10–12',nw:1,rest:75}
  ]}
 ];
-const WEEKS=12, TOTAL=WEEKS*4, GOAL=155;
+const WEEKS=12, TOTAL=WEEKS*4;
 
 /* ---------- состояние ---------- */
 let S={week:1,day:0,log:{}};
-let P={date:'',g:0,hist:{}};
 const today=()=>{const d=new Date();return new Date(d.getTime()-d.getTimezoneOffset()*6e4).toISOString().slice(0,10);};
 
 /* Работает и внутри Claude, и как отдельное приложение на телефоне */
@@ -465,25 +411,20 @@ function showErr(m){document.getElementById('err').innerHTML='<div class="err">'
 
 async function load(){
   try{const v=await DB.get('cycle-state');if(v)S=Object.assign(S,JSON.parse(v));}catch(e){}
-  try{const v=await DB.get('protein-day');if(v)P=JSON.parse(v);}catch(e){}
-  if(!P.hist)P.hist={};
-  if(P.date!==today()){
-    if(P.date)P.hist[P.date]=P.g;
-    const keep={},cut=shiftDay(today(),-14);
-    Object.keys(P.hist).forEach(k=>{if(k>cut)keep[k]=P.hist[k];});
-    P={date:today(),g:0,hist:keep};
-  }
   if(S.week<1||S.week>WEEKS)S.week=1;
 }
+/* Метка синхронизации: at — время последней локальной записи, sent — то, что уже уехало в репо.
+   at > sent значит есть неотправленное. Срока годности у локальных данных нет и быть не может:
+   телефон — источник правды, а не кеш чужих данных. */
+let MARK={at:0,sent:0};
+const pend=()=>MARK.at>MARK.sent;
+function markSave(){DB.set('cycle-mark',JSON.stringify(MARK)).catch(()=>{})}
+
 let sT;
 function save(){clearTimeout(sT);sT=setTimeout(async()=>{
-  try{await DB.set('cycle-state',JSON.stringify(S));}
+  try{await DB.set('cycle-state',JSON.stringify(S));MARK.at=Date.now();markSave();queuePush();}
   catch(e){showErr('Не удалось сохранить. Проверь соединение и повтори действие.');}
 },250);}
-async function saveP(){
-  try{await DB.set('protein-day',JSON.stringify(P));}
-  catch(e){showErr('Не удалось сохранить белок. Повтори действие.');}
-}
 
 function rec(w,d,i){
   const k=sid(w,d), s=S.log[k]||(S.log[k]={});
@@ -565,12 +506,13 @@ function render(){
 
     const ctl=document.createElement('div');ctl.className='ex-ctl';
 
+    let sug=null,inp=null;
     if(!e.nw){
-      const sug=suggest(S.week,S.day,i);
+      sug=suggest(S.week,S.day,i);
       const wt=document.createElement('div');wt.className='wt';
       const st=e.step||2.5;
       const minus=document.createElement('button');minus.textContent='−';minus.setAttribute('aria-label','Минус '+st+' кг');
-      const inp=document.createElement('input');
+      inp=document.createElement('input');
       inp.type='number';inp.step='1.25';inp.inputMode='decimal';
       inp.setAttribute('aria-label','Вес: '+e.n);
       if(r.w!=null)inp.value=r.w; else if(sug!=null)inp.placeholder=sug;
@@ -593,6 +535,8 @@ function render(){
       b.setAttribute('aria-label','Подход '+(k+1));
       b.onclick=()=>{
         r.s[k]=!r.s[k];b.classList.toggle('on',!!r.s[k]);
+        /* Отмеченный подход = подтверждённый вес. Иначе подсказка остаётся placeholder и вес не попадает в лог */
+        if(r.s[k]&&r.w==null&&sug!=null){r.w=sug;if(inp)inp.value=sug;}
         save();drawSc();
         if(r.s[k]&&k<e.sets-1)startClock(e.rest,e.n);
       };
@@ -707,102 +651,160 @@ document.getElementById('clkStop').onclick=()=>{
   document.getElementById('clock').classList.remove('up');
 };
 
-/* ---------- белок ---------- */
-const FOODS={
- home:[
-  ['Куриная грудка','150 г готовой',45],
-  ['Индейка','140 г',42],
-  ['Говядина','150 г',40],
-  ['Свиная вырезка','150 г',40],
-  ['Куриное бедро','180 г, без кожи',40],
-  ['Творог 5%','пачка 200 г',34],
-  ['Тунец консервированный','банка',25],
-  ['Протеин','порция',24],
-  ['Кефир','стакан',8],
-  ['Яйцо','1 шт',7]
- ],
- out:[
-  ['Стейк','300 г',62],
-  ['Курица гриль','порция',50],
-  ['Шашлык','порция',48],
-  ['Люля-кебаб','2 шт',35],
-  ['Цезарь с курицей','порция',30],
-  ['Бургер','1 шт',30],
-  ['Пицца','половина',30],
-  ['Паста карбонара','порция',25],
-  ['Ладонь мяса','без пальцев',27]
- ]
-};
-const undoStack=[];
-let curG='home';
-
-const shiftDay=(iso,n)=>{
-  const p=iso.split('-').map(Number);
-  const d=new Date(p[0],p[1]-1,p[2]+n);
-  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+/* ---------- синхронизация с приватным репозиторием ---------- */
+/* Бэкенда нет: один JSON в приватном репо через Contents API GitHub.
+   Токен лежит только в localStorage этого устройства. В файле его быть не должно —
+   репозиторий приложения публичный, вписанный токен утечёт в первый же пуш. */
+/* Доступ к репозиторию с данными вписан прямо в файл — по указанию владельца,
+   риск принят им осознанно. Репозиторий приложения публичный: после пуша этот токен
+   общедоступен, и любой сможет писать в cycle-data.
+   Отзыв: Settings -> Developer settings -> Fine-grained tokens -> Revoke.
+   Введённое в интерфейсе перекрывает эти значения. */
+const CFG={
+  repo:'mgavriluk/cycle-data',
+  token:'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'
 };
 
-function addP(v){
-  P.g=Math.max(0,P.g+v);
-  if(v>0)undoStack.push(v);
-  drawP();saveP();
-}
-function drawFoods(){
-  const box=document.getElementById('foods');box.innerHTML='';
-  FOODS[curG].forEach(f=>{
-    const b=document.createElement('button');b.className='food';
-    b.innerHTML='<span class="fn">'+f[0]+'<i>'+f[1]+'</i></span><span class="fg">'+f[2]+' г</span>';
-    b.onclick=()=>addP(f[2]);
-    box.appendChild(b);
-  });
-}
-function drawP(){
-  document.getElementById('proVal').textContent=P.g;
-  document.getElementById('proDate').textContent=P.date.slice(8,10)+'.'+P.date.slice(5,7);
-  const f=document.getElementById('proFill');
-  f.style.width=Math.min(100,P.g/200*100)+'%';
-  f.classList.toggle('hit',P.g>=150);
+const SYNC={
+  file:'cycle.json',
+  cfg:null,
+  sha:null,
 
-  let sum=0,n=0;
-  for(let i=0;i<7;i++){
-    const v = i===0 ? P.g : P.hist[shiftDay(P.date,-i)];
-    if(v!=null){sum+=v;n++;}
+  on(){return !!(this.cfg&&this.cfg.repo&&this.cfg.token)},
+  st(t){document.getElementById('syncSt').textContent=t},
+  show(){
+    if(!this.on()){this.st('выключена');return}
+    this.st(pend()?'не отправлено':(MARK.sent?'отправлено':'включена'));
+  },
+
+  /* base64 через UTF-8: в заметках бывает кириллица, btoa её сам не переварит */
+  enc(t){return btoa(String.fromCharCode(...new TextEncoder().encode(t)))},
+  dec(b){return new TextDecoder().decode(Uint8Array.from(atob(b.replace(/[^A-Za-z0-9+/=]/g,'')),c=>c.charCodeAt(0)))},
+
+  api(opt){
+    return fetch('https://api.github.com/repos/'+this.cfg.repo+'/contents/'+this.file,{
+      ...opt,
+      headers:{Authorization:'Bearer '+this.cfg.token,Accept:'application/vnd.github+json'}
+    });
+  },
+
+  async pull(){
+    if(!this.on())return null;
+    const r=await this.api();
+    if(r.status===404)return null;                       // файла ещё нет — первая запись создаст
+    if(r.status===401||r.status===403)throw new Error('токен не принят');
+    if(!r.ok)throw new Error('GitHub '+r.status);
+    const j=await r.json();
+    this.sha=j.sha;
+    return JSON.parse(this.dec(j.content));
+  },
+
+  async push(){
+    if(!this.on())return;
+    const at=MARK.at||Date.now();                        // фиксируем до запроса: во время него могут дописать
+    const put=sha=>this.api({
+      method:'PUT',
+      keepalive:true,                                    // чтобы запись дожила до сворачивания приложения
+      body:JSON.stringify({
+        message:'цикл '+today()+': неделя '+S.week+', день '+(S.day+1),
+        content:this.enc(JSON.stringify({S,at},null,1)),
+        ...(sha?{sha}:{})
+      })
+    });
+    let r=await put(this.sha);
+    if(r.status===409||r.status===422){                   // sha устарел — перечитать и записать поверх
+      await this.pull();
+      r=await put(this.sha);
+    }
+    if(!r.ok)throw new Error('GitHub '+r.status);
+    this.sha=(await r.json()).content.sha;
+    MARK.sent=at;markSave();
+  },
+
+  async start(){
+    try{this.cfg=JSON.parse(await DB.get('gh-sync')||'null')}catch(e){this.cfg=null}
+    if(!this.on())this.cfg=CFG;                          // вписанное в файл — запас, если в хранилище пусто
+    try{MARK=JSON.parse(await DB.get('cycle-mark')||'null')||MARK}catch(e){}
+    if(!this.on()){this.st('выключена');return}
+    document.getElementById('syncRepo').value=this.cfg.repo;
+    this.st('проверяю…');
+    try{
+      const rem=await this.pull();
+      /* Тянем только когда локально пусто: телефон здесь единственный источник правды,
+         а пустой лог = свежая установка или снесённое хранилище.
+         ponytail: для двух устройств понадобится сверка по rem.at */
+      if(rem&&rem.S&&!Object.keys(S.log).length){
+        S=Object.assign(S,rem.S);
+        MARK={at:rem.at||Date.now(),sent:rem.at||Date.now()};markSave();   // взяли из репо — отправлять нечего
+        this.st('восстановлено из репо');
+      }else if(pend()){
+        await this.push();                               // прошлый пуш не дошёл — догоняем
+        this.show();
+      }else{
+        this.show();
+      }
+    }catch(e){this.st('ошибка: '+e.message)}
   }
-  const el=document.getElementById('proAvg');
-  if(n>=2){
-    const a=Math.round(sum/n);
-    el.innerHTML='За '+n+' дн. в среднем <b>'+a+' г</b>'+(a>=150?' — норма держится':'');
-    el.classList.toggle('ok',a>=150);
-  }else{
-    el.textContent='Среднее за неделю появится через пару дней';
-    el.classList.remove('ok');
-  }
-}
-document.querySelectorAll('#proSeg button').forEach(b=>{
-  b.onclick=()=>{
-    curG=b.dataset.g;
-    document.querySelectorAll('#proSeg button').forEach(x=>x.classList.toggle('on',x===b));
-    drawFoods();
-  };
-});
-document.querySelectorAll('.pro-manual button[data-a]').forEach(b=>{
-  b.onclick=()=>addP(+b.dataset.a);
-});
-document.getElementById('proUndo').onclick=()=>{
-  if(undoStack.length)addP(-undoStack.pop());
 };
-document.getElementById('proReset').onclick=()=>{
-  P.g=0;undoStack.length=0;drawP();saveP();
+
+let pT;
+function queuePush(){
+  if(!SYNC.on())return;
+  clearTimeout(pT);
+  SYNC.show();
+  pT=setTimeout(()=>{
+    SYNC.st('отправляю…');
+    SYNC.push().then(()=>SYNC.show()).catch(e=>SYNC.st('ошибка: '+e.message));
+  },10000);                                              // не на каждый тап по подходу
+}
+addEventListener('pagehide',()=>{clearTimeout(pT);if(SYNC.on()&&pend())SYNC.push().catch(()=>{})});
+
+/* Догоняющая отправка: вернулся в приложение или появилась сеть — неотправленное уезжает само.
+   Без этого пуш, сорванный в зале без связи, лежал бы до следующей отметки подхода. */
+function retryPush(){
+  if(!SYNC.on()||!pend())return;
+  clearTimeout(pT);
+  SYNC.st('отправляю…');
+  SYNC.push().then(()=>SYNC.show()).catch(e=>SYNC.st('ошибка: '+e.message));
+}
+addEventListener('online',retryPush);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)retryPush()});
+
+document.getElementById('syncOn').onclick=async()=>{
+  const repo=document.getElementById('syncRepo').value.trim();
+  const token=document.getElementById('syncTok').value.trim();
+  const part=repo.split('/');
+  if(part.length!==2||!part.every(x=>x&&/^[-A-Za-z0-9_.]+$/.test(x))){SYNC.st('репо в виде логин/название');return}
+  if(!token){SYNC.st('нужен токен');return}
+  SYNC.cfg={repo,token};SYNC.sha=null;
+  SYNC.st('проверяю…');
+  try{
+    await SYNC.pull();                                   // 404 тоже годится: доступ есть, файла нет
+    await SYNC.push();
+    await DB.set('gh-sync',JSON.stringify(SYNC.cfg));
+    document.getElementById('syncTok').value='';
+    SYNC.st('включена, лог отправлен');
+  }catch(e){SYNC.cfg=null;SYNC.st('не вышло: '+e.message)}
+};
+
+document.getElementById('syncPull').onclick=async()=>{
+  if(!SYNC.on()){SYNC.st('сначала включи');return}
+  SYNC.st('читаю…');
+  try{
+    const rem=await SYNC.pull();
+    if(!rem||!rem.S){SYNC.st('в репо пока пусто');return}
+    S=Object.assign(S,rem.S);
+    save();render();
+    SYNC.st('взято из репо');
+  }catch(e){SYNC.st('ошибка: '+e.message)}
 };
 
 /* ---------- старт ---------- */
 document.getElementById('wPrev').onclick=()=>{if(S.week>1){S.week--;save();render();}};
 document.getElementById('wNext').onclick=()=>{if(S.week<WEEKS){S.week++;save();render();}};
 
-drawFoods();
-
 document.getElementById('bkOut').onclick=()=>{
-  const blob=new Blob([JSON.stringify({S,P},null,1)],{type:'application/json'});
+  const blob=new Blob([JSON.stringify({S},null,1)],{type:'application/json'});
   const a=document.createElement('a');
   a.href=URL.createObjectURL(blob);a.download='cycle-backup.json';a.click();
 };
@@ -814,8 +816,7 @@ document.getElementById('bkIn').onclick=()=>{
       try{
         const d=JSON.parse(rd.result);
         if(d.S)S=Object.assign(S,d.S);
-        if(d.P&&d.P.date===today())P=d.P;
-        save();saveP();render();drawP();
+        save();render();
       }catch(e){showErr('Файл не читается. Нужен cycle-backup.json.');}
     };
     rd.readAsText(f.files[0]);
@@ -823,7 +824,7 @@ document.getElementById('bkIn').onclick=()=>{
   f.click();
 };
 
-(async()=>{await load();render();drawP();})();
+(async()=>{await load();await SYNC.start();render();})();
 </script>
 </body>
 </html>
